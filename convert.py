@@ -1,20 +1,12 @@
 import os
 from PIL import Image
-import pillow_heif
 from rembg import remove
 import io
 
-def convert_heic_to_jpg_and_customize(heic_path, jpg_path, remove_bg=True, make_square=True, compress=False):
+def convert_image_and_customize(image_path, jpg_path, remove_bg=True, make_square=True, compress=False):
     try:
-        # Read HEIC file
-        heif_file = pillow_heif.read_heif(heic_path)
-        # Convert HEIC data to a PIL image
-        image = Image.frombytes(
-            heif_file.mode,
-            heif_file.size,
-            heif_file.data,
-            "raw",
-        )
+        # Open the image file
+        image = Image.open(image_path)
 
         if remove_bg:
             # Remove background
@@ -50,21 +42,21 @@ def convert_heic_to_jpg_and_customize(heic_path, jpg_path, remove_bg=True, make_
             image.save(jpg_path, "JPEG")
 
     except Exception as e:
-        print(f"Failed to convert {heic_path}: {e}")
+        print(f"Failed to convert {image_path}: {e}")
 
-def batch_convert_heic_to_jpg(input_directory, output_directory, remove_bg, make_square, compress):
+def batch_convert_images(input_directory, output_directory, remove_bg, make_square, compress):
     # Ensure the output directory exists
     if not os.path.exists(output_directory):
         os.makedirs(output_directory)
 
-    # Process each HEIC file in the input directory
+    # Process each image file in the input directory
     for filename in os.listdir(input_directory):
-        if filename.lower().endswith('.heic'):
-            heic_path = os.path.join(input_directory, filename)
-            jpg_filename = filename[:-5] + '.jpg'
+        if filename.lower().endswith('.heic') or filename.lower().endswith('.jpg'):
+            image_path = os.path.join(input_directory, filename)
+            jpg_filename = filename[:-4] + '.jpg'
             jpg_path = os.path.join(output_directory, jpg_filename)
             print(f"Converting {filename} to {jpg_filename}...")
-            convert_heic_to_jpg_and_customize(heic_path, jpg_path, remove_bg, make_square, compress)
+            convert_image_and_customize(image_path, jpg_path, remove_bg, make_square, compress)
             print(f"Saved to {jpg_path}")
 
 # Gather user input to configure the process
@@ -73,6 +65,6 @@ make_square = input("Make 1:1 ratio? (y/n): ").strip().lower() == 'y'
 compress = input("Compress the image to be under 2MB? (y/n): ").strip().lower() == 'y'
 
 # Example usage
-input_directory = '/Users/sirapolwareechuensuk/Desktop/Shopee/jpg7/'
-output_directory = '/Users/sirapolwareechuensuk/Desktop/Shopee/jpg7/'
-batch_convert_heic_to_jpg(input_directory, output_directory, remove_bg, make_square, compress)
+input_directory = '/Users/sirapolwareechuensuk/Desktop/Shopee/'
+output_directory = '/Users/sirapolwareechuensuk/Desktop/Shopee/compressed/'
+batch_convert_images(input_directory, output_directory, remove_bg, make_square, compress)
